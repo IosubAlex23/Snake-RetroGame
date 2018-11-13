@@ -13,6 +13,9 @@
 #define PIN_MODE_IN 0
 #define PIN_MODE_OUT 1
 
+#define UINT8_LS_HALF(x) (x & 0x0F)
+#define UINT8_MS_HALF(x) (x >> 0x4u)
+
 typedef unsigned char bool;
 
 typedef unsigned char uint8;
