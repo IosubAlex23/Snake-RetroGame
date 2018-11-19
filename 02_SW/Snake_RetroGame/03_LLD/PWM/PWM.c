@@ -57,8 +57,8 @@ void PWM_vInit()
 	{
 		/* Enable clock for FTM module */
 		SIM_SCGC |= (1 << (FTM_OFFSET_IN_SCGC + PWM_moduleInit[index].FTM_ID));
-		/* FTM2 CH0 mapped on PTH0 */
-		SIM_PINSEL1 |= 0x1u;
+		/* FTM2 CH0 mapped on PTH0
+		SIM_PINSEL1 |= 0x1u;*/
 		/* Calculating address of the SC register */
 		FTM_Pointer = (uint32) FTM_SC_BASE_ADR
 				+ ((uint32) PWM_moduleInit[index].FTM_ID * FTM_SC_OFFSET);
