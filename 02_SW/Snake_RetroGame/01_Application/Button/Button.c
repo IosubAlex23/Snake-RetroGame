@@ -94,7 +94,6 @@ void Button_vMainFunction()
 		}
 		Button_State[index].btnOldState = actualState;
 	}
-	delay_ms(1);
 }
 
 tButtonState Button_tGetButtonState(uint8 btnId)

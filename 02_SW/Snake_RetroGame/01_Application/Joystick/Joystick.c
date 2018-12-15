@@ -10,8 +10,8 @@
 #include "types.h"
 #include "ADC.h"
 
-#define UP_ADC_VALUE 800
-#define DOWN_ADC_VALUE 225
+#define UP_ADC_VALUE 900
+#define DOWN_ADC_VALUE 100
 
 uint8 rxAdcCh, ryAdcCh;
 uint8 sampling_counter = 0;

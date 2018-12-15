@@ -42,7 +42,7 @@
  *
  *
  */
-#define SPI1_BR_VAL	(0x78u) /* 0x42 is the calculated value, 0x78 is used when testing on myDaq*/
+#define SPI1_BR_VAL	(0x66u) /* 0x64 is the calculated value, 0x78 is used when testing on myDaq*/
 
 /*----------------------------------------------------------------------------*/
 /*                              Local data types                              */
@@ -99,7 +99,6 @@ tOperationResultType SPI_vReadData(uint8 * dataLocation)
 	*dataLocation = SPI1_D; /* Return received data */
 	return OPERATION_SUCCESS;
 }
-
 /*----------------------------------------------------------------------------*/
 /*                     Implementation of local functions                      */
 /*----------------------------------------------------------------------------*/
