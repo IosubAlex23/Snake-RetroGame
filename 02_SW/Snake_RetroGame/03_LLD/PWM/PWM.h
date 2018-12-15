@@ -49,6 +49,12 @@ void PWM_vInit();
  * 			  Percent - PWM percent to be set.
  * \return    tOperationResultType: OPERATION_SUCCESS or OPERATION_ERROR
  */
-tOperationResultType PWM_vSetDutyCycle(uint8 ModuleAndChannel, uint8 Percent);
+tOperationResultType PWM_tSetDutyCycle(uint8 ModuleAndChannel, uint8 Percent);
+/*
+ * \brief     This function is used to get the value of the CNT register
+ * \param     Module - ID of the PWM module
+ * \return    uint16: Value of the counter;
+ *  */
+uint16 PWM_uiReadCntValue(uint8 Module);
 
 #endif /* PWM_PWM_H_ */

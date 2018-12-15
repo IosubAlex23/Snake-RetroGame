@@ -19,6 +19,9 @@
 #define FTM_CxV_OFFSET  		 	(0x1000u)
 #define FTM_CxV_CHANNELS_OFFSET  	(0x8u)
 
+#define FTM_CNT_BASE_ADR 		 	(0x40038004u)
+#define FTM_CNT_OFFSET  		 	(0x1000u)
+
 #define FTM_OFFSET_IN_SCGC			(0x5u)
 
 #define FTM_SC_MOD_OFFSET (0x2u) /* offset between SC register and MOD register */
@@ -58,7 +61,7 @@ void PWM_vInit()
 		/* Enable clock for FTM module */
 		SIM_SCGC |= (1 << (FTM_OFFSET_IN_SCGC + PWM_moduleInit[index].FTM_ID));
 		/* FTM2 CH0 mapped on PTH0
-		SIM_PINSEL1 |= 0x1u;*/
+		 SIM_PINSEL1 |= 0x1u;*/
 		/* Calculating address of the SC register */
 		FTM_Pointer = (uint32) FTM_SC_BASE_ADR
 				+ ((uint32) PWM_moduleInit[index].FTM_ID * FTM_SC_OFFSET);
@@ -75,11 +78,10 @@ void PWM_vInit()
 	}
 }
 
-tOperationResultType PWM_vSetDutyCycle(uint8 ModuleAndChannel, uint8 Percent)
+tOperationResultType PWM_tSetDutyCycle(uint8 ModuleAndChannel, uint8 Percent)
 {
 	uint8 index;
 	uint32 * FTM_CxV;
-	uint32 aux;
 	tOperationResultType returnValue = OPERATION_SUCCESS;
 	/* if percentage is not valid, return error */
 	if ((Percent < 0) || (Percent > 100))
@@ -95,14 +97,24 @@ tOperationResultType PWM_vSetDutyCycle(uint8 ModuleAndChannel, uint8 Percent)
 		for (index = 0; index < NUMBER_OF_PWMS; index++)
 		{
 			/* Find index of configuration to get MOD_VAL from it */
-			if (UINT8_MS_HALF(ModuleAndChannel)
-					== PWM_moduleInit[index].FTM_ID)
+			if (UINT8_MS_HALF(ModuleAndChannel) == PWM_moduleInit[index].FTM_ID)
 			{
 				/* Set CxV to the given percentage */
 				*FTM_CxV = ((Percent * PWM_moduleInit[index].MOD_VAL) / 100);
 			}
 		}
 	}
+	return returnValue;
+}
+
+uint16 PWM_uiReadCntValue(uint8 Module)
+{
+	uint16 returnValue = 0;
+	uint32 * FTM_CNT;
+	/* Calculate adress of CxV for the selected module */
+	FTM_CNT = FTM_CNT_BASE_ADR
+			+ (FTM_CNT_OFFSET * UINT8_LS_HALF(Module));
+	returnValue = *FTM_CNT;
 	return returnValue;
 }
 /*----------------------------------------------------------------------------*/
