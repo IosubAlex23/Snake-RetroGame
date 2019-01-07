@@ -40,15 +40,13 @@ void App_vInit()
 int main(void)
 {
 	App_vInit();
-
-	/*Nebuneala totala, maxim merge
-	 *
-	 * */
+	/* Pull up for joystick button, no time for drivers :D :( */
+	PORT_PUE1 |= (1 << JOYSTICK_BTN_PIN);
 	while (1)
 	{
+		Button_vMainFunction();
 		Snake_vMainFunction();
 		LCD_vMainFunction();
-		Button_vMainFunction();
 
 	}
 

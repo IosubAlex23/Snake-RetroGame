@@ -10,6 +10,8 @@
 
 #include "types.h"
 
+#define JOYSTICK_BTN_PIN	(26u)
+
 typedef enum {
 	JoyStick_Center=0,
 	JoyStick_North,

@@ -16,6 +16,7 @@
 #include "stdlib.h"
 #include "LCD.h"
 #include "Joystick.h"
+#include "Button.h"
 /*----------------------------------------------------------------------------*/
 /*                               Local defines                                */
 /*----------------------------------------------------------------------------*/
@@ -33,6 +34,8 @@
 #define ACTUAL_SCORE_LOCATION_X			(11u)
 #define ACTUAL_SCORE_LOCATION_Y			(0u)
 
+#define BACKLIGHT_INITIAL_PERCENT		(70u)
+#define BACKLIGHT_MODULE_AND_CH			(0x20)
 /*----------------------------------------------------------------------------*/
 /*                              Local data types                              */
 /*----------------------------------------------------------------------------*/
@@ -88,6 +91,7 @@ uint8 FruitTimer;
 uint8 FruitTimerLimit;
 SnakeFruit SnakeMainFruit;
 Snake_Direction actualDirection;
+uint8 gameBacklight;
 /*----------------------------------------------------------------------------*/
 /*                             Local data at ROM                              */
 /*----------------------------------------------------------------------------*/
@@ -104,9 +108,11 @@ void Snake_vGenerateFruit(void);
 /*----------------------------------------------------------------------------*/
 void Snake_vInit(void)
 {
+	PWM_tSetDutyCycle(BACKLIGHT_MODULE_AND_CH, BACKLIGHT_INITIAL_PERCENT);
+	gameBacklight = BACKLIGHT_INITIAL_PERCENT;
 	Joystick_mean = 0;
 	actualDirection = DIRECTION_EAST;
-	stateOfTheGame = GameState_Playing;
+	stateOfTheGame = GameState_StartMenu;
 	actual_score = 0;
 	FruitTimerLimit = SNAKE_INITIAL_FRUIT_TIMER_LIMIT;
 	Snake_body = (SnakeStruct*) malloc(
@@ -137,6 +143,7 @@ void Snake_vInit(void)
 
 void Snake_vMainFunction(void)
 {
+	uint8 index, index2;
 	if (GameState_Playing == stateOfTheGame)
 	{
 
@@ -167,7 +174,7 @@ void Snake_vMainFunction(void)
 			}
 
 		}
-		if((FruitTimer % 3) == 0)
+		if ((FruitTimer % 3) == 0)
 		{
 			Snake_vMove(actualDirection);
 		}
@@ -179,6 +186,53 @@ void Snake_vMainFunction(void)
 		else
 		{
 			FruitTimer++;
+		}
+	}
+	else if (GameState_StartMenu == stateOfTheGame)
+	{
+		prevState = currentState;
+		currentState = getJoystickState();
+
+		if (JoyStick_Center == prevState)
+		{
+			if (JoyStick_South == currentState)
+			{
+				if (gameBacklight == 0)
+				{
+					gameBacklight = 0;
+				}
+				else
+				{
+					gameBacklight -= 10;
+				}
+				PWM_tSetDutyCycle(BACKLIGHT_MODULE_AND_CH, gameBacklight);
+			}
+			else if (JoyStick_North == currentState)
+			{
+				if (gameBacklight == 100)
+				{
+					gameBacklight = 100;
+				}
+				else
+				{
+					gameBacklight += 10;
+				}
+				PWM_tSetDutyCycle(BACKLIGHT_MODULE_AND_CH, gameBacklight);
+			}
+			else if (BUTTON_PRESSED == Button_tGetButtonState(0))
+			{
+				stateOfTheGame = GameState_Playing;
+				/* clears text from LCD */
+				for (index = 0; index < 4; index++)
+				{
+					for (index2 = 0; index2 <= SNAKE_EASTERN_ROW; index2++)
+					{
+						LCD_vUpdateDataOnDisplay(index2,
+						ACTUAL_SCORE_LOCATION_Y + index + 2,
+						LCD_BLANK);
+					}
+				}
+			}
 		}
 	}
 	Snake_vUpdateInfoText();
@@ -227,11 +281,46 @@ void Snake_vUpdateDisplayAS(void)
 
 void Snake_vUpdateInfoText(void)
 {
+	uint8 index;
+	uint8 index2;
+	uint8 * text;
 	if (GameState_GameOver == stateOfTheGame)
 	{
-		uint8 index;
-		uint8 * text = "Looser!";
+		text = "Looser!";
 		for (index = 0; index < 7; index++)
+		{
+			LCD_vUpdateDataOnDisplay(index, 0, text[index]);
+		}
+	}
+	else if (GameState_StartMenu == stateOfTheGame)
+	{
+		text = "Snake! BL: ";
+
+		for (index = 0; index < 11; index++)
+		{
+			LCD_vUpdateDataOnDisplay(index, 0, text[index]);
+		}
+		LCD_vUpdateDataOnDisplay(ACTUAL_SCORE_LOCATION_X,
+		ACTUAL_SCORE_LOCATION_Y, (gameBacklight / 100) + 0x30); // sute
+		LCD_vUpdateDataOnDisplay(ACTUAL_SCORE_LOCATION_X + 1,
+		ACTUAL_SCORE_LOCATION_Y, ((gameBacklight / 10) % 10) + 0x30); // zeci
+		LCD_vUpdateDataOnDisplay(ACTUAL_SCORE_LOCATION_X + 2,
+		ACTUAL_SCORE_LOCATION_Y, (gameBacklight % 10) + 0x30); // cifre
+		text = "Use UP/DOWN tochange bklight              Hold OK = play";
+		for (index = 0; index < 4; index++)
+		{
+			for (index2 = 0; index2 <= SNAKE_EASTERN_ROW; index2++)
+			{
+				LCD_vUpdateDataOnDisplay(index2,
+				ACTUAL_SCORE_LOCATION_Y + index + 2, text[14 * index + index2]); // +2 means a 2 rows offset from the first row
+			}
+		}
+	}
+	else if (GameState_Playing == stateOfTheGame)
+	{
+		text = "your score:";
+
+		for (index = 0; index < 11; index++)
 		{
 			LCD_vUpdateDataOnDisplay(index, 0, text[index]);
 		}
@@ -356,12 +445,11 @@ void Snake_vGenerateFruit(void)
 		xRandom = (rand() % (SNAKE_EASTERN_ROW - SNAKE_WESTERN_ROW))
 				+ SNAKE_WESTERN_ROW;
 		srand(PWM_uiReadCntValue(2));
-		yRandom = (rand() % (SNAKE_BOTTOM_ROW - SNAKE_TOP_ROW))
-				+ SNAKE_TOP_ROW;
+		yRandom = (rand() % (SNAKE_BOTTOM_ROW - SNAKE_TOP_ROW)) + SNAKE_TOP_ROW;
 	} while (0u == LCD_IsPositionFree(xRandom, yRandom));
 	/* Clears the fruit that was not eaten */
 	LCD_vUpdateDataOnDisplay(SnakeMainFruit.xPos, SnakeMainFruit.yPos,
-			LCD_BLANK);
+	LCD_BLANK);
 	SnakeMainFruit.xPos = xRandom;
 	SnakeMainFruit.yPos = yRandom;
 	LCD_vUpdateDataOnDisplay(xRandom, yRandom, SNAKE_FRUIT);
