@@ -14,7 +14,7 @@
 /*                               Local defines                                */
 /*----------------------------------------------------------------------------*/
 #define BUTTONS_NO_OF_BUTTONS		(1u)
-#define BUTTON_DEBOUNCE_TIME		(10u)
+#define BUTTON_DEBOUNCE_TIME		(5u)
 #define PTH2						(0x3Au) /* 001 = GPIOB, 11010 = bit with index 26*/
 /*----------------------------------------------------------------------------*/
 /*                              Local data types                              */
@@ -36,7 +36,7 @@ static tButtonType Button_State[BUTTONS_NO_OF_BUTTONS] =
 		/** button should be initialised with {x,y,BUTTON_PRESSED, BUTTON_NOT_PRESSED}
 		 ** otherwise first button push will not be read
 		 **/
-		{ PTH2, BUTTON_DEBOUNCE_TIME, BUTTON_PRESSED, BUTTON_NOT_PRESSED }
+		{ PTH2, BUTTON_DEBOUNCE_TIME, BUTTON_NOT_PRESSED, BUTTON_PRESSED }
 };
 /*----------------------------------------------------------------------------*/
 /*                             Local data at ROM                              */
